@@ -1,0 +1,42 @@
+# Datatypes (KEYWORD1)
+
+XpressNetClass				KEYWORD1
+
+
+# Methods and Functions (KEYWORD2)
+
+start					KEYWORD2
+receive					KEYWORD2
+setPower				KEYWORD2
+setHalt					KEYWORD2
+getLocoInfo				KEYWORD2
+getLocoFunc				KEYWORD2
+setLocoHalt				KEYWORD2
+setLocoDrive				KEYWORD2
+setLocoFunc				KEYWORD2
+getLocoStateFull			KEYWORD2
+getTrntInfo				KEYWORD2
+setTrntPos				KEYWORD2
+readCVMode				KEYWORD2
+writeCVMode				KEYWORD2
+getrestultCV				KEYWORD2
+setFree					KEYWORD2
+
+notifyXNetStatus			KEYWORD2
+notifyXNetVersion			KEYWORD2
+notifyXNetPower				KEYWORD2
+notifyLokInfo				KEYWORD2
+notifyLokFunc				KEYWORD2
+notifyLokAll				KEYWORD2
+notifyCVInfo				KEYWORD2
+notifyCVResult				KEYWORD2
+notifyTrnt				KEYWORD2
+
+
+# Constants (LITERAL1)
+
+csNormal				LITERAL1
+csEmergencyStop				LITERAL1
+csTrackVoltageOff			LITERAL1
+csShortCircuit				LITERAL1
+csServiceMode				LITERAL1
