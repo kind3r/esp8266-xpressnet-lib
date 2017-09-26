@@ -14,7 +14,12 @@
 
 // include this library's description file
 #include "XpressNet.h"
+#if defined(__arm__)
 #include <avr/interrupt.h>
+#else
+#include <RS485SoftwareSerial.h>
+RS485SoftwareSerial rs485(2,4);
+#endif
 
 #define interval 10500      //interval for Status LED (milliseconds)
 
@@ -57,6 +62,7 @@ void XpressNetClass::start(byte XAdr, int XControl)  //Initialisierung Serial
 	myDirectedOps = callByteParity (MY_ADDRESS | 0x60) | 0x100; 
 
 	//Set up on 62500 Baud
+	#if defined(__arm__)
 	cli();  //disable interrupts while initializing the USART
 	#if defined(SERIAL_PORT)
 	 UBRRH = 0;
@@ -78,6 +84,9 @@ void XpressNetClass::start(byte XAdr, int XControl)  //Initialisierung Serial
 	 UCSR1C = (1<<UCSZ11) | (1<<UCSZ10);
 	 #endif
 	sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed 
+	#else
+	rs485.begin(62500, 9);
+	#endif
 	 /*
 	 *  Enable reception (RXEN = 1).
 	 *  Enable transmission (TXEN0 = 1). 
@@ -690,6 +699,7 @@ byte XpressNetClass::callByteParity (byte me) {
 //--------------------------------------------------------------------------------------------
 int XpressNetClass::USART_Receive(void)
 {
+#if defined(__avr__)
 	unsigned char status, resh, resl;
 	// Wait for data to be received
 #if defined(SERIAL_PORT)
@@ -729,10 +739,18 @@ int XpressNetClass::USART_Receive(void)
 	// Filter the 9th bit, then return 
 	resh = (resh >> 1) & 0x01;
 	return ((resh << 8) | resl);
+#else
+	if (rs485.available()) {
+		return (rs485.read() >> 1);
+	} else {
+		return -1;
+	}
+#endif
 }
 
 //--------------------------------------------------------------------------------------------
 void XpressNetClass::USART_Transmit(unsigned char data8) {
+#if defined(__avr__)
  // wait for empty transmit buffer
  #if defined(SERIAL_PORT)
   while (!(UCSRA & (1<<UDRE))) {}
@@ -747,6 +765,9 @@ void XpressNetClass::USART_Transmit(unsigned char data8) {
  // put the data into buffer, and send
  UDR1 = data8;
  #endif
+#else
+	rs485.write(data8);
+#endif
 }
 
 //--------------------------------------------------------------------------------------------
@@ -765,6 +786,7 @@ void XpressNetClass::XNetclear()
 
 //--------------------------------------------------------------------------------------------
 //Interrupt routine for reading via Serial
+#if defined(__avr__)
 #if defined(SERIAL_PORT)
 ISR(USART_RX_vect)  {
 	XpressNetClass::handle_interrupt();	 //weiterreichen an die Funktion
@@ -780,7 +802,11 @@ ISR(USART1_RX_vect) {
 	XpressNetClass::handle_interrupt();	 //weiterreichen an die Funktion
 }
 #endif
-
+#elif defined(ARDUINO_ESP8266_ESP01)
+void RS485Data() {
+	XpressNetClass::handle_interrupt();
+}
+#endif
 
 // Interrupt handling
 /* static */
@@ -799,7 +825,7 @@ void XpressNetClass::XNetget()
 	unsigned int rxdata = USART_Receive();
 	
 	if ((int)rxdata != -1) {		//Daten wurden korrekt empfangen?
-		Serial.println(rxdata, HEX);
+		// Serial.println(rxdata, HEX);
 		previousMillis = 0;		//Reset Time Count
 		// This IS a Call Byte
 		if (rxdata >= 0x100) {		//Neue Nachricht beginnen
@@ -897,7 +923,9 @@ void XpressNetClass::XNetsend(unsigned char *dataString, byte byteCount) {
      USART_Transmit (*dataString);
      dataString ++;
 	}
+#if defined(__avr__)
    WAIT_FOR_XMIT_COMPLETE;
+#endif
    digitalWrite (MAX485_CONTROL, HIGH);
 } 
 
