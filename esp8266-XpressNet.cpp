@@ -13,9 +13,9 @@
 */
 
 // include this library's description file
-#include "XpressNet.h"
+#include "esp8266-XpressNet.h"
 
-#if defined(__arm__)
+#if defined(__AVR__)
 #include <avr/interrupt.h>
 #endif
 
@@ -58,7 +58,7 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	myDirectedOps = callByteParity (MY_ADDRESS | 0x60) | 0x100; 
 
 	//Set up on 62500 Baud
-#if defined(__arm__)
+#if defined(__AVR__)
 	// LISTEN_MODE 
 	pinMode(MAX485_CONTROL, OUTPUT);
 	digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
@@ -82,7 +82,7 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	 UCSR1A = 0;
 	 UCSR1B = (1<<RXEN1) | (1<<TXEN1) | (1<<RXCIE1) | (1<<UCSZ12);
 	 UCSR1C = (1<<UCSZ11) | (1<<UCSZ10);
-	 #endif
+	#endif
 	sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed 
 #elif defined(ARDUINO_ESP8266_ESP01)
 	// start RS485 9 bit interface on 62500 baud rate
@@ -108,6 +108,9 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 //Daten ermitteln und Auswerten
 void XpressNetClass::receive(void) 
 {
+#if defined(ARDUINO_ESP8266_ESP01)
+	XNetget();
+#endif
 	/*
 	XNetMsg[XNetlength] = 0x00;
 	XNetMsg[XNetmsg] = 0x00;
@@ -702,7 +705,7 @@ byte XpressNetClass::callByteParity (byte me) {
 //--------------------------------------------------------------------------------------------
 int XpressNetClass::USART_Receive(void)
 {
-#if defined(__arm__)
+#if defined(__AVR__)
 	unsigned char status, resh, resl;
 	// Wait for data to be received
 #if defined(SERIAL_PORT)
@@ -744,7 +747,8 @@ int XpressNetClass::USART_Receive(void)
 	return ((resh << 8) | resl);
 #elif defined(ARDUINO_ESP8266_ESP01)
 	if (rs485.available()) {
-		return (rs485.read() >> 1);
+		int dat = rs485.read();
+		return dat;
 	} else {
 		return -1;
 	}
@@ -753,7 +757,7 @@ int XpressNetClass::USART_Receive(void)
 
 //--------------------------------------------------------------------------------------------
 void XpressNetClass::USART_Transmit(unsigned char data8) {
-#if defined(__arm__)
+#if defined(__AVR__)
  // wait for empty transmit buffer
  #if defined(SERIAL_PORT)
   while (!(UCSRA & (1<<UDRE))) {}
@@ -789,7 +793,7 @@ void XpressNetClass::XNetclear()
 
 //--------------------------------------------------------------------------------------------
 //Interrupt routine for reading via Serial
-#if defined(__arm__)
+#if defined(__AVR__)
 #if defined(SERIAL_PORT)
 ISR(USART_RX_vect)  {
 	XpressNetClass::handle_interrupt();	 //weiterreichen an die Funktion
@@ -806,9 +810,9 @@ ISR(USART1_RX_vect) {
 }
 #endif
 #elif defined(ARDUINO_ESP8266_ESP01)
-void RS485Data() {
-	XpressNetClass::handle_interrupt();
-}
+// void RS485Data() {
+// 	XpressNetClass::handle_interrupt();
+// }
 #endif
 
 // Interrupt handling
@@ -828,7 +832,7 @@ void XpressNetClass::XNetget()
 	unsigned int rxdata = USART_Receive();
 	
 	if ((int)rxdata != -1) {		//Daten wurden korrekt empfangen?
-		// Serial.println(rxdata, HEX);
+		// Serial.println(rxdata, BIN);
 		previousMillis = 0;		//Reset Time Count
 		// This IS a Call Byte
 		if (rxdata >= 0x100) {		//Neue Nachricht beginnen
@@ -861,6 +865,7 @@ void XpressNetClass::XNetget()
 			ReadData = true;          // Let's record this someone's request
 		}
 		if (ReadData == true) {   //Data is for our own address
+			Serial.println(rxdata, BIN);
 			XNetMsg[XNetlength]++;      //Let's make room for it...
 			XNetMsg[XNetMsg[XNetlength]] = rxdata;  //...and store it
 		}
@@ -920,7 +925,7 @@ void XpressNetClass::XNetsend(void)
 // send along a bunch of bytes to the Command Station
 void XpressNetClass::XNetsend(unsigned char *dataString, byte byteCount) {
 	 unsigned int i;
-#if defined(__arm__)
+#if defined(__AVR__)
 	 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? LOW : HIGH);
 #endif
 //   delayMicroseconds(3);
@@ -928,7 +933,7 @@ void XpressNetClass::XNetsend(unsigned char *dataString, byte byteCount) {
      USART_Transmit (*dataString);
      dataString ++;
 	}
-#if defined(__arm__)
+#if defined(__AVR__)
 	 WAIT_FOR_XMIT_COMPLETE;
 	 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
 #endif

@@ -16,7 +16,7 @@
 //RS485 send/receive pin
 #define XNetRS485_TXRX 5
 
-#include <XpressNet.h>
+#include <esp8266-XpressNet.h>
 XpressNetClass XpressNet;
 
 void setup()
@@ -25,7 +25,7 @@ void setup()
   Serial.begin(115200);
 
   XpressNet.start(XNetAddress, XNetRS485_TXRX, true);
-  XpressNet.setPower(csNormal);
+ XpressNet.setPower(csNormal);
 
 }
 

@@ -158,7 +158,7 @@ class XpressNetClass
 	boolean XNetRun;	//XpressNet ist aktiv
 	byte MY_ADDRESS;	//XpressNet address: must be in range of 1-31; must be unique.
 	byte MAX485_CONTROL; //Port for send or receive control
-	boolean MAX485_REVERSE; // reverse send or recive control (HIGH = receive, LOW = send)
+	boolean MAX485_REVERSE; // reverse send or recive control (default LOW = receive, HIGH = send with reverse HIGH = receive, LOW = send)
 	unsigned int myDirectedOps;		// the address we look for when we are listening for ops
 	unsigned int myCallByteInquiry;	// the address we look for for our Call Byte Window
 	unsigned int myRequestAck;		// the address for a request acknowlegement sent
