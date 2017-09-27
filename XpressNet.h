@@ -48,8 +48,16 @@
 #define SERIAL_PORT_1
 #undef SERIAL_PORT_0
 
-#elif defined(ARDUINO_ESP8266_ESP01)
-// nothing to do for esp8266
+#elif defined(ARDUINO_ESP8266_ESP01) //ESP8266
+#include <RS485SoftwareSerial.h>
+// define RS485 TX pin
+#ifndef XNetRS485_TX
+#define XNetRS485_TX 4
+#endif
+// define RS485 RX pin
+#ifndef XNetRS485_RX
+#define XNetRS485_RX 2
+#endif
 #else //others Arduino UNO
 #define SERIAL_PORT_0
 #undef SERIAL_PORT_1
@@ -120,7 +128,7 @@ class XpressNetClass
   // user-accessible "public" interface
   public:
     XpressNetClass(void);	//Constuctor
-	void start(byte XAdr, int XControl);  //Initialisierung Serial
+	void start(byte XAdr, int XControl, bool XControlReverse = false);  //Initialisierung Serial
 	void receive(void);				//Pr�fe ob XNet Packet vorhanden und werte es aus.
 
 	bool setPower(byte Power);		//Zustand Gleisspannung Melden
@@ -150,6 +158,7 @@ class XpressNetClass
 	boolean XNetRun;	//XpressNet ist aktiv
 	byte MY_ADDRESS;	//XpressNet address: must be in range of 1-31; must be unique.
 	byte MAX485_CONTROL; //Port for send or receive control
+	boolean MAX485_REVERSE; // reverse send or recive control (HIGH = receive, LOW = send)
 	unsigned int myDirectedOps;		// the address we look for when we are listening for ops
 	unsigned int myCallByteInquiry;	// the address we look for for our Call Byte Window
 	unsigned int myRequestAck;		// the address for a request acknowlegement sent
@@ -159,6 +168,9 @@ class XpressNetClass
 	void XNetget(void);			//Empfangene Daten eintragen 
 	XSend XNetSend[XSendMax];		//Sendbuffer
 	XNetLok xLokSts[SlotMax];		//Speicher f�r aktive Lokzust�nde
+#if defined(ARDUINO_ESP8266_ESP01)
+	RS485SoftwareSerial rs485;
+#endif
 
 		//Functions:
 	void getXOR (unsigned char *data, byte length); // calculate the XOR
