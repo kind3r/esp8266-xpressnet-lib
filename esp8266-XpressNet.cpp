@@ -84,20 +84,19 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	 UCSR1C = (1<<UCSZ11) | (1<<UCSZ10);
 	#endif
 	sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed 
-#elif defined(ARDUINO_ESP8266_ESP01)
-	// start RS485 9 bit interface on 62500 baud rate
-	rs485.setup(XNetRS485_RX, XNetRS485_TX);
-	rs485.begin(62500, 9);
-	rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
-#endif
-	 /*
+	/*
 	 *  Enable reception (RXEN = 1).
 	 *  Enable transmission (TXEN0 = 1). 
 	 *	Enable Receive Interrupt (RXCIE = 1).
 	 *  Set 8-bit character mode (UCSZ00, UCSZ01, and UCSZ02 together control this, 
 	 *  But UCSZ00, UCSZ01 are in Register UCSR0C).
 	 */
-	
+#elif defined(ARDUINO_ESP8266_ESP01)
+	// start RS485 9 bit interface on 62500 baud rate
+	rs485.setup(XNetRS485_RX, XNetRS485_TX);
+	rs485.begin(62500, 9);
+	rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
+#endif
 	active_object = this;		//hold Object to call it back in ISR
 }
 
@@ -865,7 +864,7 @@ void XpressNetClass::XNetget()
 			ReadData = true;          // Let's record this someone's request
 		}
 		if (ReadData == true) {   //Data is for our own address
-			Serial.println(rxdata, BIN);
+			// Serial.println(rxdata, BIN);
 			XNetMsg[XNetlength]++;      //Let's make room for it...
 			XNetMsg[XNetMsg[XNetlength]] = rxdata;  //...and store it
 		}
