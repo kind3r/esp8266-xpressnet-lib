@@ -60,8 +60,10 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	//Set up on 62500 Baud
 #if defined(__AVR__)
 	// LISTEN_MODE 
-	pinMode(MAX485_CONTROL, OUTPUT);
-	digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
+	if(MAX485_CONTROL >= 0) {
+		pinMode(MAX485_CONTROL, OUTPUT);
+		digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
+	}
 
 	cli();  //disable interrupts while initializing the USART
 	#if defined(SERIAL_PORT)
@@ -95,7 +97,9 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	// start RS485 9 bit interface on 62500 baud rate
 	rs485.setup(XNetRS485_RX, XNetRS485_TX);
 	rs485.begin(62500, 9);
-	rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
+	if(MAX485_CONTROL >= 0) {
+		rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
+	}
 #endif
 	active_object = this;		//hold Object to call it back in ISR
 }
@@ -925,7 +929,9 @@ void XpressNetClass::XNetsend(void)
 void XpressNetClass::XNetsend(unsigned char *dataString, byte byteCount) {
 	 unsigned int i;
 #if defined(__AVR__)
-	 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? LOW : HIGH);
+	 if(MAX485_CONTROL >= 0) {
+		 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? LOW : HIGH);
+	 }
 #endif
 //   delayMicroseconds(3);
    for (i=0; i< byteCount; i++) {
@@ -934,7 +940,9 @@ void XpressNetClass::XNetsend(unsigned char *dataString, byte byteCount) {
 	}
 #if defined(__AVR__)
 	 WAIT_FOR_XMIT_COMPLETE;
-	 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
+	 if(MAX485_CONTROL >= 0) {
+		 digitalWrite (MAX485_CONTROL, MAX485_REVERSE ? HIGH : LOW);
+	 }
 #endif
    
 } 

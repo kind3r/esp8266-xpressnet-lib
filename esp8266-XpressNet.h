@@ -128,7 +128,7 @@ class XpressNetClass
   // user-accessible "public" interface
   public:
     XpressNetClass(void);	//Constuctor
-	void start(byte XAdr, int XControl, bool XControlReverse = false);  //Initialisierung Serial
+	void start(byte XAdr, int XControl = -1, bool XControlReverse = false);  //Initialisierung Serial
 	void receive(void);				//Pr�fe ob XNet Packet vorhanden und werte es aus.
 
 	bool setPower(byte Power);		//Zustand Gleisspannung Melden
