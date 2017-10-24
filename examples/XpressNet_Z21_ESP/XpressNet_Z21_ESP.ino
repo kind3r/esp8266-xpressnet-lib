@@ -95,7 +95,7 @@ char S88sendon = '0'; //Bit Änderung
 
 byte S88Module = 2; //Anzahl der Module - maximal 62 Module à 16 Ports
 
-byte data[62]; //Zustandsspeicher für 62x 8fach Modul
+byte S88data[62]; //Zustandsspeicher für 62x 8fach Modul
 
 //--------------------------------------------------------------
 // XpressNet address: must be in range of 1-31; must be unique. Note that some IDs
@@ -219,17 +219,17 @@ void loop()
 {
 
   XpressNet.receive(); //Check for XpressNet
-
+  yield();
   Ethreceive(); //Read Data on UDP Port
-
+  yield();
   XpressNet.receive(); //Check for XpressNet
-
+  yield();
 #if defined(WEBCONFIG)
   Webconfig(); //Webserver for Configuration
 #endif
-
+  yield();
   notifyS88Data(); //R-Bus geänderte Daten Melden
-
+  yield();
   //Nicht genutzte IP's aus Speicher löschen
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis > interval)
@@ -252,6 +252,7 @@ void loop()
       }
     }
   }
+  yield();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -960,9 +961,9 @@ void S88readData()
   byte Modul = S88RMCount / 8;
   byte Port = S88RMCount % 8;
   byte getData = digitalRead(S88DataPin); //Bit einlesen
-  if (bitRead(data[Modul], Port) != getData)
+  if (bitRead(S88data[Modul], Port) != getData)
   {                                       //Zustandsänderung Prüfen?
-    bitWrite(data[Modul], Port, getData); //Bitzustand Speichern
+    bitWrite(S88data[Modul], Port, getData); //Bitzustand Speichern
     S88sendon = 's';                      //Änderung vorgenommen. (SET)
   }
   S88RMCount++;
@@ -978,12 +979,12 @@ void notifyS88Data()
     datasend[0] = 0;   //Gruppenindex für Adressen 1 bis 10
     for (byte m = 0; m < S88Module; m++)
     { //Durchlaufe alle aktiven Module im Speicher
-      datasend[MAdr] = data[m];
+      datasend[MAdr] = S88data[m];
 #if defined(DEBUG)
       Debug.print(F("S88 "));
       Debug.print(m);
       Debug.print(F(":, "));
-      Debug.print(data[m], BIN);
+      Debug.print(S88data[m], BIN);
       Debug.print(F("; "));
 #endif
 
