@@ -644,8 +644,8 @@ void Ethreceive()
 #if defined(DEBUG)
       Debug.println("LAN_RMBUS_GETDATA");
 #endif
-      //    S88sendon = 'm';    //Daten werden gemeldet!
-      //    notifyS88Data();
+      S88sendon = 'm';    //Daten werden gemeldet!
+      notifyS88Data();
       break;
     case (0x82):
 #if defined(DEBUG)
@@ -979,12 +979,23 @@ void notifyS88Data()
     for (byte m = 0; m < S88Module; m++)
     { //Durchlaufe alle aktiven Module im Speicher
       datasend[MAdr] = data[m];
+#if defined(DEBUG)
+      Debug.print(F("S88 "));
+      Debug.print(m);
+      Debug.print(F(":, "));
+      Debug.print(data[m], BIN);
+      Debug.print(F("; "));
+#endif
+
       MAdr++; //Nächste Modul in der Gruppe
       if (MAdr >= 11)
       {                                             //10 Module à 8 Ports eingelesen
         MAdr = 1;                                   //beginne von vorn
         EthSend(0x0F, 0x80, datasend, false, 0x02); //RMBUS_DATACHANED
         datasend[0]++;                              //Gruppenindex erhöhen
+#if defined(DEBUG)
+        Debug.println();
+#endif
       }
     }
     if (MAdr < 11)
@@ -995,6 +1006,9 @@ void notifyS88Data()
         MAdr++;                //Nächste Modul in der Gruppe
       }
       EthSend(0x0F, 0x80, datasend, false, 0x02); //RMBUS_DATACHANED
+#if defined(DEBUG)
+      Debug.println();
+#endif
     }
     S88sendon = '0'; //Speicher Rücksetzten
   }
