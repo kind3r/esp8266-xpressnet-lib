@@ -100,6 +100,13 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 	if(MAX485_CONTROL >= 0) {
 		rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
 	}
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+	// start RS485 9 bit interface on 62500 baud rate
+	rs485.setup(XNetRS485_RX, XNetRS485_TX);
+	rs485.begin(62500, 9);
+	if(MAX485_CONTROL >= 0) {
+		rs485.setTransmitEnablePin(MAX485_CONTROL, MAX485_REVERSE);
+	}
 #endif
 	active_object = this;		//hold Object to call it back in ISR
 }
@@ -112,6 +119,8 @@ void XpressNetClass::start(byte XAdr, int XControl, bool XControlReverse)  //Ini
 void XpressNetClass::receive(void) 
 {
 #if defined(ARDUINO_ESP8266_ESP01)
+	XNetget();
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
 	XNetget();
 #endif
 	/*
@@ -755,6 +764,13 @@ int XpressNetClass::USART_Receive(void)
 	} else {
 		return -1;
 	}
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+	if (rs485.available()) {
+		int dat = rs485.read();
+		return dat;
+	} else {
+		return -1;
+	}
 #endif
 }
 
@@ -776,6 +792,8 @@ void XpressNetClass::USART_Transmit(unsigned char data8) {
  UDR1 = data8;
  #endif
 #elif defined(ARDUINO_ESP8266_ESP01)
+	rs485.write(data8);
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
 	rs485.write(data8);
 #endif
 }

@@ -58,6 +58,18 @@
 #ifndef XNetRS485_RX
 #define XNetRS485_RX 2
 #endif
+
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI) //WeMos
+#include <RS485SoftwareSerial.h>
+// define RS485 TX pin
+#ifndef XNetRS485_TX
+#define XNetRS485_TX 2
+#endif
+// define RS485 RX pin
+#ifndef XNetRS485_RX
+#define XNetRS485_RX 0
+#endif
+
 #else //others Arduino UNO
 #define SERIAL_PORT_0
 #undef SERIAL_PORT_1
@@ -169,6 +181,8 @@ class XpressNetClass
 	XSend XNetSend[XSendMax];		//Sendbuffer
 	XNetLok xLokSts[SlotMax];		//Speicher f�r aktive Lokzust�nde
 #if defined(ARDUINO_ESP8266_ESP01)
+	RS485SoftwareSerial rs485;
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
 	RS485SoftwareSerial rs485;
 #endif
 
