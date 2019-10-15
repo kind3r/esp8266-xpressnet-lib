@@ -32,6 +32,10 @@
  #include <WProgram.h>
 #endif
 
+#ifdef ARDUINO_ESP8266_NODEMCU
+#define ARDUINO_ESP8266_ESP01
+#endif
+
 /* From the ATMega datasheet: */
 //--------------------------------------------------------------------------------------------
 // Which serial port is used, if we have more than one on the chip?
