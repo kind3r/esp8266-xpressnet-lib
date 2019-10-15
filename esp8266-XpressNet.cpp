@@ -853,6 +853,9 @@ void XpressNetClass::XNetget()
 	unsigned int rxdata = USART_Receive();
 	
 	if ((int)rxdata != -1) {		//Daten wurden korrekt empfangen?
+		if (notifyXNetData)
+			notifyXNetData(rxdata);
+
 		// Serial.println(rxdata, BIN);
 		previousMillis = 0;		//Reset Time Count
 		// This IS a Call Byte
