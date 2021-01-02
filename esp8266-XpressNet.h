@@ -32,6 +32,10 @@
  #include <WProgram.h>
 #endif
 
+#ifdef ARDUINO_ESP8266_NODEMCU
+#define ARDUINO_ESP8266_ESP01
+#endif
+
 /* From the ATMega datasheet: */
 //--------------------------------------------------------------------------------------------
 // Which serial port is used, if we have more than one on the chip?
@@ -250,7 +254,7 @@ class XpressNetClass
 	extern void notifyCVResult(uint8_t cvAdr, uint8_t cvData ) __attribute__ ((weak));
 	extern void notifyTrnt(uint8_t Adr_High, uint8_t Adr_Low, uint8_t Pos) __attribute__ ((weak));
 
-//	extern void notifyXNetData(unsigned int data, bool line) __attribute__((weak));
+        extern void notifyXNetData(uint16_t data) __attribute__((weak));
 
 #if defined (__cplusplus)
 }

@@ -850,9 +850,12 @@ inline void XpressNetClass::handle_interrupt()
 //Serial einlesen:
 void XpressNetClass::XNetget() 
 {
-        const uint16_t rxdata = USART_Receive();
+  const uint16_t rxdata = USART_Receive();
 
 	if (rxdata != 0xffff) {		//Daten wurden korrekt empfangen?
+		if (notifyXNetData)
+			notifyXNetData(rxdata);
+
 		// Serial.println(rxdata, BIN);
 		previousMillis = 0;		//Reset Time Count
 		// This IS a Call Byte
