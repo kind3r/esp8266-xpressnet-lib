@@ -850,9 +850,9 @@ inline void XpressNetClass::handle_interrupt()
 //Serial einlesen:
 void XpressNetClass::XNetget() 
 {
-	unsigned int rxdata = USART_Receive();
-	
-	if ((int)rxdata != -1) {		//Daten wurden korrekt empfangen?
+  const uint16_t rxdata = USART_Receive();
+
+	if (rxdata != 0xffff) {		//Daten wurden korrekt empfangen?
 		if (notifyXNetData)
 			notifyXNetData(rxdata);
 
